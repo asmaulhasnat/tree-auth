@@ -1,0 +1,27 @@
+DELIMITER $$
+
+USE `global_auth`$$
+
+DROP PROCEDURE IF EXISTS `permited_user_procedure`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `permited_user_procedure`(IN `id` INT)
+
+BEGIN
+DECLARE login_user INT;
+SET login_user=id;
+ DROP TEMPORARY TABLE IF EXISTS temp_table;
+    CREATE TEMPORARY TABLE temp_table
+    (   id INT AUTO_INCREMENT PRIMARY KEY,
+	user_id INT NOT NULL,
+	loginuser INT NOT NULL,
+      	user_name VARCHAR(255) NOT NULL
+    );
+  REPEAT
+ INSERT INTO temp_table(id, user_id,loginuser,user_name) SELECT NULL, users.id,login_user AS loginuser,users.name FROM users WHERE users.id=id;
+ SET id = (SELECT users.parent_id FROM users  WHERE users.id=id);
+ UNTIL id=0  END REPEAT;
+    
+ SELECT * FROM temp_table WHERE loginuser=login_user;
+END$$
+
+DELIMITER ;
